@@ -115,7 +115,7 @@ MonoBehaviour:
   m_MinSize: {x: 678, y: 492}
   m_MaxSize: {x: 14002, y: 14042}
   vertical: 0
-  controlID: 63
+  controlID: 59
 --- !u!114 &6
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -395,7 +395,7 @@ MonoBehaviour:
       scrollPos: {x: 0, y: 0}
       m_SelectedIDs: 
       m_LastClickedID: 0
-      m_ExpandedIDs: 72fbffff
+      m_ExpandedIDs: 72fbffff843c0000
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -455,9 +455,9 @@ MonoBehaviour:
   m_PlayAudio: 0
   m_AudioPlay: 0
   m_Position:
-    m_Target: {x: 360.42743, y: 289.22156, z: -61.25}
+    m_Target: {x: 594.4071, y: 82.32368, z: -93.28125}
     speed: 2
-    m_Value: {x: 360.42743, y: 289.22156, z: -61.25}
+    m_Value: {x: 594.4071, y: 82.32368, z: -93.28125}
   m_RenderMode: 0
   m_CameraMode:
     drawMode: 0
@@ -507,9 +507,9 @@ MonoBehaviour:
     speed: 2
     m_Value: {x: 0, y: 0, z: 0, w: 1}
   m_Size:
-    m_Target: 665.1782
+    m_Target: 264.85333
     speed: 2
-    m_Value: 665.1782
+    m_Value: 277.33334
   m_Ortho:
     m_Target: 1
     speed: 2
@@ -653,19 +653,19 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - Assets/Shader
+    - Assets
   m_ViewMode: 1
   m_StartGridSize: 64
   m_LastFolders:
-  - Assets/Shader
+  - Assets
   m_LastFoldersGridSize: -1
-  m_LastProjectPath: X:\UnityProjekte\ExitRoom
+  m_LastProjectPath: X:\GitHub\Reposetorys\ExitRoom\ExitRoom\ExitRoom
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
     scrollPos: {x: 0, y: 0}
-    m_SelectedIDs: 3a410000
-    m_LastClickedID: 16698
+    m_SelectedIDs: aa3a0000
+    m_LastClickedID: 15018
     m_ExpandedIDs: 00000000aa3a000000410000024100000441000006410000084100000a410000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
