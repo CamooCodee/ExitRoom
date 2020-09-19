@@ -15,10 +15,6 @@ public class PlayerVision : MonoBehaviour
 	[Space(15f)]
 	public LayerMask whatIsInteractable;
 
-
-	public delegate void EmptyVisionDelegate();
-	public event EmptyVisionDelegate OnVisionEnter;
-	public event EmptyVisionDelegate OnVisionExit;
 	#endregion
 
 	#region UnityFunctions
@@ -31,17 +27,16 @@ public class PlayerVision : MonoBehaviour
 
 		if(firstFrame && inVision == null)
 		{
-			OnVisionExit?.Invoke();
+			GameEvents.current.Player.PlayerVisionExit();
 		}
 
 		if(inVision != previousVision && inVision != null)
 		{
-			OnVisionExit?.Invoke();
-			OnVisionEnter?.Invoke();
+			GameEvents.current.Player.PlayerVisionEnter();
 		}
 		else if (inVision != previousVision)
 		{
-			OnVisionExit?.Invoke();
+			GameEvents.current.Player.PlayerVisionExit();
 		}
 
 		previousVision = inVision;

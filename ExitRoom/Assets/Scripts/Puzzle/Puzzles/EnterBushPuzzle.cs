@@ -57,7 +57,7 @@ public class EnterBushPuzzle : PuzzleCompletor
 	{
 		if (isAnimating || player.GetComponent<PlayerVision>().inVision != gameObject) return;
 
-		UIManager.current.DeactivateAll();
+		UIManager.current.DisableAll();
 
 		player.GetComponent<PlayerMovement>().SetActive(false);
 		player.GetComponent<PlayerLook>().SetActive(false);

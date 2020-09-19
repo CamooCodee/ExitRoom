@@ -21,7 +21,6 @@ public class PlayerMovement : MonoBehaviour
 	Vector3 velocity;
 	bool canMove = true;
 	bool isGrounded = false;
-	bool isSprinting = false;
 	#endregion
 
 	#region UnityFunctions
@@ -53,17 +52,14 @@ public class PlayerMovement : MonoBehaviour
 		CheckGround();
 		HandleVertical(CheckGround());
 	}
-
 	void Sprint()
 	{
 		if (Input.GetKeyDown(KeyCode.LeftShift))
 		{
-			isSprinting = true;
 			speed *= 1.8f;
 		}
 		else if (Input.GetKeyUp(KeyCode.LeftShift))
 		{
-			isSprinting = false;
 			speed /= 1.8f;
 		}
 	}
@@ -75,7 +71,6 @@ public class PlayerMovement : MonoBehaviour
 			velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
 		}
 	}
-
 	void HandleVertical(bool isOnGround)
 	{
 		if (isOnGround && velocity.y < 0f)
@@ -88,7 +83,6 @@ public class PlayerMovement : MonoBehaviour
 		velocity.y += gravity * Time.deltaTime;
 		controller.Move(velocity * Time.deltaTime);
 	}
-
 	bool CheckGround()
 	{
 		isGrounded = Physics.CheckSphere(groundCheck.position, groundCheckRadius, whatIsGround);

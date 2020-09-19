@@ -1,15 +1,133 @@
-﻿using System.Collections;
+﻿using System.Reflection;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
+//TODO 
+//- save if activationLocks are active when deactivating and activate them if they were acitve
+public class UIManager : MonoBehaviour
+{
+	public static UIManager current;
+
+	#region Variables
+	public GameObject canvas;
+	public List<UIBase> uiManager = new List<UIBase>();
+
+	#region BookUI
+	public Component ui_Book;
+	public TextMeshProUGUI ui_BookHintText;
+	#endregion
+	#region VisionUI
+	public Component ui_VisionInfo;
+	#endregion
+	public Component ui_Crosshair;
+
+	public List<Component> uiObjects = new List<Component>();
+
+	#endregion
+
+	#region UnityFunctions
+	private void Awake()
+	{
+		if (current != null)
+		{
+			Debug.LogError("Make sure theres only one UIManager in the current scene");
+		}
+		else
+		{
+			current = this;
+		}
+		InitializeUIObjects();
+	}
+	private void Start()
+	{
+		AddManager(new BookUI(current, ui_Book, ui_BookHintText));
+		AddManager(new VisionUI(current, ui_VisionInfo));
+	}
+
+	private void Update()
+	{
+		foreach (UIBase manager in uiManager)
+		{
+			manager.InputThread();
+			manager.UpdateThread();
+		}
+	}
+	#endregion
+
+	#region UniqueFunctions
+	void InitializeUIObjects()
+	{
+		FieldInfo[] fields = this.GetType().GetFields();
+
+		foreach (FieldInfo field in fields)
+		{
+			if (field.Name.Contains("ui_"))
+			{
+				if(!field.FieldType.IsSubclassOf(typeof(Component)) && field.FieldType != typeof(Component))
+				{
+					throw new System.Exception($"Variables tagged with 'ui_' can't be of type: {field.FieldType.Name}. Needs to be a Component");
+				}
+				uiObjects.Add(field.GetValue(this) as Component);
+			}
+		}
+	}
+
+	public void DisableAll(Component apartFrom = null)
+	{
+		if (apartFrom == null)
+		{
+			canvas.SetActive(false);
+			return;
+		}
+
+		foreach (Component obj in uiObjects)
+		{
+			if(obj != apartFrom && !obj.IsIndirectChildOf(apartFrom.transform))
+			{
+				obj.gameObject.SetActive(false);
+			}
+		}
+	}
+	public void EnableAll(Component apartFrom = null)
+	{
+		if (!canvas.activeSelf || apartFrom == null)
+		{
+			canvas.SetActive(true);
+			return;
+		}
+
+		foreach (Component obj in uiObjects)
+		{
+			if (obj != apartFrom && !obj.IsIndirectChildOf(apartFrom.transform) && !obj.transform.CompareTag("ActivationLock"))
+			{
+				obj.gameObject.SetActive(true);
+			}
+		}
+	}
+
+	public void AddManager(UIBase manager)
+	{
+		uiManager.Add(manager);
+	}
+	#endregion
+
+	#region DebugFunctions
+
+	#endregion
+
+	#region MathOrLibaryRework
+
+	#endregion
+}
+
 public class UIBase
 {
-	public GameObject player;
+	public readonly UIManager Manager;
 
-	public UIBase(GameObject player)
+	public UIBase(UIManager manager)
 	{
-		this.player = player;
+		Manager = manager;
 	}
 
 	public virtual void InputThread()
@@ -24,12 +142,12 @@ public class UIBase
 #region UIClasses
 public class BookUI : UIBase
 {
-	GameObject book;
-	TextMeshProUGUI bookText;
+	readonly GameObject book;
+	readonly TextMeshProUGUI bookText;
 
-	public BookUI(GameObject bookObj, TextMeshProUGUI bookHintText, GameObject player) : base (player)
+	public BookUI(UIManager manager, Component bookObj, TextMeshProUGUI bookHintText) : base(manager)
 	{
-		book = bookObj;
+		book = bookObj.gameObject;
 		bookText = bookHintText;
 
 		PuzzleManager.current.OnNewPuzzle += UpdateBookHint;
@@ -40,39 +158,51 @@ public class BookUI : UIBase
 	{
 		if (Input.GetKeyDown(KeyCode.Tab))
 		{
-			book.SetActive(!book.activeSelf);
+			ToggleBook();
 		}
 	}
 	public override void UpdateThread()
 	{
-		
+
 	}
 	#endregion
 
+	void ToggleBook()
+	{
+		book.SetActive(!book.activeSelf);
+
+		if (book.activeSelf)
+		{
+			Manager.DisableAll(book.transform);
+		}
+		else
+		{
+			Manager.EnableAll(book.transform);
+		}
+	}
 	void UpdateBookHint(PuzzleCompletor currentPuzzle)
 	{
-		if(currentPuzzle.puzzleData == null) return;
+		if (currentPuzzle.puzzleData == null) return;
 
 		bookText.text = currentPuzzle.puzzleData.bookHint;
 	}
 }
-
 public class VisionUI : UIBase
 {
-	GameObject visionInfo;
+	readonly GameObject visionInfo;
 
-	public VisionUI(GameObject visionPopUp, GameObject player) : base (player)
+	public VisionUI(UIManager manager, Component visionPopUp) : base(manager)
 	{
-		visionInfo = visionPopUp;
+		visionInfo = visionPopUp.gameObject;
 
-		player.GetComponent<PlayerVision>().OnVisionEnter += ActivatePopUp;
-		player.GetComponent<PlayerVision>().OnVisionExit += DeactivatePopUp;
+		GameEvents.current.Player.OnPlayerVisionEnter += ActivatePopUp;
+		GameEvents.current.Player.OnPlayerVisionExit += DeactivatePopUp;
 	}
 
 	#region UIBaseFuncs
 	public override void InputThread()
 	{
-		
+
 	}
 	public override void UpdateThread()
 	{
@@ -90,70 +220,3 @@ public class VisionUI : UIBase
 	}
 }
 #endregion
-
-public class UIManager : MonoBehaviour
-{
-	public static UIManager current;
-
-	#region Variables
-	public GameObject canvas;
-	public List<UIBase> uiManager = new List<UIBase>();
-	public GameObject player;
-
-	#region BookUI
-	public GameObject book;
-	public TextMeshProUGUI bookHintText;
-	#endregion
-	#region VisionUI
-	public GameObject visionInfo;
-	#endregion
-
-	#endregion
-
-	#region UnityFunctions
-	private void Awake()
-	{
-		if (current != null)
-		{
-			Debug.LogError("Make sure theres only one UIManager in the current scene");
-		}
-		else
-		{
-			current = this;
-		}
-	}
-	private void Start()
-	{
-		AddManager(new BookUI(book, bookHintText, player));
-		AddManager(new VisionUI(visionInfo, player));
-	}
-
-	private void Update()
-	{
-		foreach (UIBase manager in uiManager)
-		{
-			manager.InputThread();
-			manager.UpdateThread();
-		}
-	}
-	#endregion
-
-	#region UniqueFunctions
-	public void AddManager(UIBase manager)
-	{
-		uiManager.Add(manager);
-	}
-	public void DeactivateAll()
-	{
-		canvas.SetActive(false);
-	}
-	#endregion
-
-	#region DebugFunctions
-
-	#endregion
-
-	#region MathOrLibaryRework
-
-	#endregion
-}
