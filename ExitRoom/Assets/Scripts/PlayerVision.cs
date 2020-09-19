@@ -18,19 +18,30 @@ public class PlayerVision : MonoBehaviour
 	#endregion
 
 	#region UnityFunctions
+	private void Start()
+	{
+		InitializeRecallEvents();
+	}
 
 	bool firstFrame = true;
 
 	private void Update()
-	{ 
+	{
+		HandleVision();
+	}
+	#endregion
+
+	#region UniqueFunctions
+	void HandleVision()
+	{
 		inVision = GetVisionObject();
 
-		if(firstFrame && inVision == null)
+		if (firstFrame && inVision == null)
 		{
 			GameEvents.current.Player.PlayerVisionExit();
 		}
 
-		if(inVision != previousVision && inVision != null)
+		if (inVision != previousVision && inVision != null)
 		{
 			GameEvents.current.Player.PlayerVisionEnter();
 		}
@@ -43,10 +54,6 @@ public class PlayerVision : MonoBehaviour
 
 		firstFrame = false;
 	}
-	#endregion
-
-	#region UniqueFunctions
-
 	public GameObject GetVisionObject()
 	{
 		if (Physics.Raycast(cam.transform.position, cam.transform.forward, out RaycastHit hit, visionRange, whatIsInteractable))
@@ -57,6 +64,19 @@ public class PlayerVision : MonoBehaviour
 		{
 			return null;
 		}
+	}
+
+	public void InitializeRecallEvents()
+	{
+		if(!GameEvents.current.Player.hasRecall)
+		{
+			GameEvents.current.Player.SetRecallEvent(EventRecall);
+		}
+	}
+	void EventRecall()
+	{
+		Debug.Log("Reset previous");
+		previousVision = null;
 	}
 	#endregion
 	

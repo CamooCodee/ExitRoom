@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
-//TODO 
-//- save if activationLocks are active when deactivating and activate them if they were acitve
 public class UIManager : MonoBehaviour
 {
 	public static UIManager current;
@@ -20,6 +18,7 @@ public class UIManager : MonoBehaviour
 	#region VisionUI
 	public Component ui_VisionInfo;
 	#endregion
+
 	public Component ui_Crosshair;
 
 	public List<Component> uiObjects = new List<Component>();
@@ -106,6 +105,11 @@ public class UIManager : MonoBehaviour
 		}
 	}
 
+	public void HandleMajorUiRedraw()
+	{
+		GameEvents.current.RecallAllEvents();
+	}
+
 	public void AddManager(UIBase manager)
 	{
 		uiManager.Add(manager);
@@ -178,6 +182,7 @@ public class BookUI : UIBase
 		else
 		{
 			Manager.EnableAll(book.transform);
+			Manager.HandleMajorUiRedraw();
 		}
 	}
 	void UpdateBookHint(PuzzleCompletor currentPuzzle)

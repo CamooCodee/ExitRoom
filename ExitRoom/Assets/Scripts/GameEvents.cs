@@ -2,21 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerEvents
-{
-	public event Action OnPlayerVisionEnter;
-	public event Action OnPlayerVisionExit;
-
-	public void PlayerVisionEnter(bool exitFirst = true)
-	{
-		if (exitFirst) PlayerVisionExit();
-		OnPlayerVisionEnter?.Invoke();
-	}
-	public void PlayerVisionExit()
-	{
-		OnPlayerVisionExit?.Invoke();
-	}
-}
 public class GameEvents : MonoBehaviour
 {
 	public static GameEvents current;
@@ -48,6 +33,11 @@ public class GameEvents : MonoBehaviour
 	{
 		Player = new PlayerEvents();
 	}
+
+	public void RecallAllEvents()
+	{
+		Player.RecallEvent();
+	}
 	#endregion
 
 	#region DebugFunctions
@@ -57,4 +47,38 @@ public class GameEvents : MonoBehaviour
 	#region MathOrLibaryRework
 
 	#endregion
+}
+
+public class GameEventProperty
+{
+	public bool hasRecall = false;
+	public delegate void RecallEventDelegate();
+	RecallEventDelegate recallEvent;
+
+	public void SetRecallEvent(RecallEventDelegate eventFunc)
+	{
+		recallEvent = eventFunc;
+		hasRecall = true;
+	}
+
+	public void RecallEvent()
+	{
+		recallEvent?.Invoke();
+	}
+}
+
+public class PlayerEvents : GameEventProperty
+{
+	public event Action OnPlayerVisionEnter;
+	public event Action OnPlayerVisionExit;
+
+	public void PlayerVisionEnter(bool exitFirst = true)
+	{
+		if (exitFirst) PlayerVisionExit();
+		OnPlayerVisionEnter?.Invoke();
+	}
+	public void PlayerVisionExit()
+	{
+		OnPlayerVisionExit?.Invoke();
+	}
 }
