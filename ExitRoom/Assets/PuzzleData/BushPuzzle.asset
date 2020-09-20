@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d154f206d77c8d3458df09befc0bb046, type: 3}
   m_Name: BushPuzzle
   m_EditorClassIdentifier: 
-  bookHint: Bush!
+  bookHint: Here will be a hint!
   hint1: 
   hint2: 

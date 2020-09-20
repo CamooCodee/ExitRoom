@@ -39,7 +39,6 @@ public class PuzzleManager : MonoBehaviour
 		try
 		{
 			OnNewPuzzle(puzzles[currentPuzzle + 1]);
-
 			puzzles[currentPuzzle].OnComplete -= ContinueToNextPuzzle;
 			puzzles[currentPuzzle].Activate(false);
 		}

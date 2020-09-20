@@ -37,11 +37,12 @@ public class UIManager : MonoBehaviour
 			current = this;
 		}
 		InitializeUIObjects();
+		AddManager(new BookUI(current, ui_Book, ui_BookHintText));
+		AddManager(new VisionUI(current, ui_VisionInfo));
 	}
 	private void Start()
 	{
-		AddManager(new BookUI(current, ui_Book, ui_BookHintText));
-		AddManager(new VisionUI(current, ui_VisionInfo));
+		
 	}
 
 	private void Update()
@@ -146,6 +147,7 @@ public class UIBase
 #region UIClasses
 public class BookUI : UIBase
 {
+	bool bookActiveState = false;
 	readonly GameObject book;
 	readonly TextMeshProUGUI bookText;
 
@@ -153,6 +155,8 @@ public class BookUI : UIBase
 	{
 		book = bookObj.gameObject;
 		bookText = bookHintText;
+
+		bookActiveState = book.activeSelf;
 
 		PuzzleManager.current.OnNewPuzzle += UpdateBookHint;
 	}
@@ -173,9 +177,10 @@ public class BookUI : UIBase
 
 	void ToggleBook()
 	{
-		book.SetActive(!book.activeSelf);
+		bookActiveState = !book.activeSelf;
+		book.SetActiveWithAnimation(!book.activeSelf);
 
-		if (book.activeSelf)
+		if (bookActiveState)
 		{
 			Manager.DisableAll(book.transform);
 		}

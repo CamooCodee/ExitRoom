@@ -26,4 +26,17 @@ public static class Utility
 
 		return false;
 	}
+
+	public static void SetActiveWithAnimation(this GameObject target, bool state)
+	{
+		if(target.TryGetComponent(out UIAnimation animator))
+		{
+			if (state) target.SetActive(true);
+			animator.SetActiveWithAnimation(state);
+		}
+		else
+		{
+			target.SetActive(state);
+		}
+	}
 }
