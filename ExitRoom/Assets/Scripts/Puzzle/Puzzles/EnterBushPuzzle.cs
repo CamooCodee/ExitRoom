@@ -1,11 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
 //Behaviour is on the bush
-public class EnterBushPuzzle : PuzzleCompletor
+public class EnterBushPuzzle : Puzzle
 {
 	#region Variables
 	[Space(20f)]
@@ -34,7 +35,7 @@ public class EnterBushPuzzle : PuzzleCompletor
 	#region UnityFunctions
 	private void Start()
 	{
-		postPro.profile.TryGet<ColorAdjustments>(out colorAdjustment);
+		postPro.profile.TryGet(out colorAdjustment);
 	}
 
 	private void Update()
@@ -47,8 +48,6 @@ public class EnterBushPuzzle : PuzzleCompletor
 		}
 
 		if (isAnimating) AnimateCamera();
-
-		Debug.DrawLine(transform.position, camTargetPos);
 	}
 	#endregion
 
@@ -124,6 +123,8 @@ public class EnterBushPuzzle : PuzzleCompletor
 		{
 			InvokeOnComplete();
 		}
+
+		if (puzzleData.loadNewSceneOnComplete) SceneManager.LoadScene(puzzleData.sceneIndex);
 	}
 	#endregion
 

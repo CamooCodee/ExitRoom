@@ -5,6 +5,9 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "NewPuzzle", menuName = "Puzzle")]
 public class PuzzleData : ScriptableObject
 {
+	public bool loadNewSceneOnComplete;
+	public int sceneIndex;
+
 	[TextArea(5, 10)]
 	public string bookHint = "";
 	[TextArea(3, 6)]

@@ -188,7 +188,7 @@ public class BookUI : UIBase
 			Manager.HandleMajorUiRedraw();
 		}
 	}
-	void UpdateBookHint(PuzzleCompletor currentPuzzle)
+	void UpdateBookHint(Puzzle currentPuzzle)
 	{
 		if (currentPuzzle.puzzleData == null) return;
 
