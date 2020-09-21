@@ -16,7 +16,8 @@ public class SceneDataStore : MonoBehaviour
 	{
 		if (current != null)
 		{
-			Debug.LogError("Make sure theres only one PuzzleManager in the current scene");
+			Destroy(gameObject);
+			//Debug.LogError("Make sure theres only one SceneDataStore in the current scene");
 		}
 		else
 		{

@@ -75,7 +75,6 @@ public class PlayerVision : MonoBehaviour
 	}
 	void EventRecall()
 	{
-		Debug.Log("Reset previous");
 		previousVision = null;
 	}
 	#endregion

@@ -36,16 +36,16 @@ public class EnterBushPuzzle : Puzzle
 	private void Start()
 	{
 		postPro.profile.TryGet(out colorAdjustment);
+		if(isActive)GetComponent<Interactable>().onInteract += StartAnimate;
+		else
+		{
+			DisablePuzzle();
+		}
 	}
 
 	private void Update()
 	{
 		if (!isActive) return;
-
-		if (Input.GetKeyDown(KeyCode.E))
-		{
-			StartAnimate();
-		}
 
 		if (isAnimating) AnimateCamera();
 	}
@@ -54,7 +54,7 @@ public class EnterBushPuzzle : Puzzle
 	#region UniqueFunctions
 	public void StartAnimate()
 	{
-		if (isAnimating || player.GetComponent<PlayerVision>().inVision != gameObject) return;
+		if (isAnimating) return;
 
 		UIManager.current.DisableAll();
 
@@ -68,7 +68,6 @@ public class EnterBushPuzzle : Puzzle
 		camStartRot = cam.transform.localEulerAngles;
 		isAnimating = true;
 	}
-
 	void AnimateCamera()
 	{
 		if(camTargetPos == Vector3.zero)
@@ -125,6 +124,12 @@ public class EnterBushPuzzle : Puzzle
 		}
 
 		if (puzzleData.loadNewSceneOnComplete) SceneManager.LoadScene(puzzleData.sceneIndex);
+	}
+	protected override void DisablePuzzle()
+	{
+		Destroy(GetComponent<Interactable>());
+		gameObject.layer = 0;
+		Destroy(this);
 	}
 	#endregion
 

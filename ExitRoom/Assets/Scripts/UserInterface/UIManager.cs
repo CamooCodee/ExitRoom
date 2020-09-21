@@ -154,7 +154,7 @@ public class BookUI : UIBase
 
 		bookActiveState = book.activeSelf;
 
-		PuzzleManager.current.OnNewPuzzle += UpdateBookHint;
+		if(PuzzleManager.current != null)PuzzleManager.current.OnNewPuzzle += UpdateBookHint;
 	}
 
 	#region UIBaseFuncs
@@ -173,10 +173,12 @@ public class BookUI : UIBase
 
 	void ToggleBook()
 	{
+		if (LeanTween.isTweening(book)) return;
+
 		bookActiveState = !book.activeSelf;
 		book.SetActiveWithAnimation(!book.activeSelf);
 		GameManager.current.ActivatePlayerControlls(!bookActiveState);
-		//GameManager.SetCursorLockState(!bookActiveState);
+		GameManager.SetCursorLockState(!bookActiveState);
 
 		if (bookActiveState)
 		{

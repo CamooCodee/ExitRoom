@@ -23,6 +23,10 @@ public class Puzzle : MonoBehaviour
 	{
 
 	}
+	protected virtual void DisablePuzzle()
+	{
+
+	}
 
 	protected void InvokeOnComplete()
 	{
