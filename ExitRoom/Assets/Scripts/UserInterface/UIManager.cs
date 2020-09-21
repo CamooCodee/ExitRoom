@@ -40,10 +40,6 @@ public class UIManager : MonoBehaviour
 		AddManager(new BookUI(current, ui_Book, ui_BookHintText));
 		AddManager(new VisionUI(current, ui_VisionInfo));
 	}
-	private void Start()
-	{
-		
-	}
 
 	private void Update()
 	{
@@ -179,6 +175,8 @@ public class BookUI : UIBase
 	{
 		bookActiveState = !book.activeSelf;
 		book.SetActiveWithAnimation(!book.activeSelf);
+		GameManager.current.ActivatePlayerControlls(!bookActiveState);
+		//GameManager.SetCursorLockState(!bookActiveState);
 
 		if (bookActiveState)
 		{

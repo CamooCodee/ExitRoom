@@ -26,7 +26,7 @@ public class PlayerMovement : MonoBehaviour
 	#region UnityFunctions
 	private void Update()
 	{
-		if(canMove)Move();
+		Move();
 	}
 	#endregion
 
@@ -43,7 +43,10 @@ public class PlayerMovement : MonoBehaviour
 	private void Move()
 	{
 		Sprint();
-		Vector2 input = GetInput();
+
+		Vector2 input = Vector2.zero;
+
+		if (canMove) input = GetInput();
 
 		Vector3 move = orientation.right * input.x + orientation.forward * input.y;
 
