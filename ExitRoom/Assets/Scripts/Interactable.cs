@@ -13,8 +13,8 @@ public class Interactable : MonoBehaviour
 	#region UnityFunctions
 	public void Awake()
 	{
-		playerVision = InteractableManager.current.playerVision;
-		InteractableManager.current.onInteractionAttempt += TryInteract;
+		playerVision = GameEvents.current.playerVision;
+		GameEvents.current.Player.OnInteractionAttempt += TryInteract;
 	}
 	#endregion
 
@@ -34,7 +34,7 @@ public class Interactable : MonoBehaviour
 
 	private void OnDestroy()
 	{
-		InteractableManager.current.onInteractionAttempt -= TryInteract;
+		GameEvents.current.Player.OnInteractionAttempt -= TryInteract;
 	}
 	#endregion
 

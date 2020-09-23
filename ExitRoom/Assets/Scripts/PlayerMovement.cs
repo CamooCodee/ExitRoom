@@ -78,7 +78,7 @@ public class PlayerMovement : MonoBehaviour
 	{
 		if (isOnGround && velocity.y < 0f)
 		{
-			velocity.y = -2f;
+			velocity.y = -5.5f;
 		}
 
 		Jump();

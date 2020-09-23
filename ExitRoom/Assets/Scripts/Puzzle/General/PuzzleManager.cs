@@ -27,12 +27,12 @@ public class PuzzleManager : MonoBehaviour
 		{
 			current = this;
 		}
+		currentPuzzle = -1;
+		TryLoadSceneData();
 		DeactivateFinishedPuzzles();
 	}
 	private void Start()
 	{
-		currentPuzzle = -1;
-		TryLoadSceneData();
 		ContinueToNextPuzzle();
 	}
 	#endregion
@@ -54,6 +54,7 @@ public class PuzzleManager : MonoBehaviour
 			Debug.Log("Played Through");
 			return;
 		}
+
 		if (puzzles[currentPuzzle] == null)
 		{
 			WriteSceneData();
@@ -65,6 +66,7 @@ public class PuzzleManager : MonoBehaviour
 		}
 
 		OnNewPuzzle(puzzles[currentPuzzle]);
+
 
 		puzzles[currentPuzzle].OnComplete += ContinueToNextPuzzle;
 		puzzles[currentPuzzle].Activate(true);
@@ -80,20 +82,24 @@ public class PuzzleManager : MonoBehaviour
 
 	void WriteSceneData()
 	{
-		SceneDataStore.current.AddData(new PuzzleManagerSceneData(currentPuzzle, puzzles), sceneDataStoreKey);
+		SceneDataStore.current.AddData(new PuzzleManagerSceneData(currentPuzzle), sceneDataStoreKey);
 	}
 	void LoadSceneData()
 	{
 		PuzzleManagerSceneData loadedData = SceneDataStore.current.ReadData(sceneDataStoreKey) as PuzzleManagerSceneData;
 
 		currentPuzzle = loadedData.currentPuzzle;
-		puzzles = loadedData.puzzles;
 	}
 
 	void DeactivateFinishedPuzzles()
 	{
 		for (int i = 0; i < currentPuzzle; i++)
 		{
+			if (puzzles[i].puzzleData.loadNewSceneOnComplete)
+			{
+				puzzles.Insert(i + 1, null);
+			}
+
 			puzzles[i].Activate(false);
 		}
 	}
@@ -111,11 +117,9 @@ public class PuzzleManager : MonoBehaviour
 public class PuzzleManagerSceneData : SceneData
 {
 	public int currentPuzzle = 0;
-	public List<Puzzle> puzzles;
 
-	public PuzzleManagerSceneData(int puzzle, List<Puzzle> puzzles)
+	public PuzzleManagerSceneData(int puzzle)
 	{
 		currentPuzzle = puzzle;
-		this.puzzles = puzzles;
 	}
 }

@@ -282,7 +282,7 @@ MonoBehaviour:
   speed: 7
   jumpHeight: 2
   gravity: -19
-  groundCheckRadius: 0.75
+  groundCheckRadius: 1.1
   whatIsGround:
     serializedVersion: 2
     m_Bits: 256

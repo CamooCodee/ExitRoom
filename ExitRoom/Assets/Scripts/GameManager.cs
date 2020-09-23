@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -21,6 +22,12 @@ public class GameManager : MonoBehaviour
 		{
 			current = this;
 		}
+	}
+
+	private void Start()
+	{
+		SetCursorLockState(false);
+		ActivatePlayerControlls(false);
 	}
 	#endregion
 
@@ -43,6 +50,11 @@ public class GameManager : MonoBehaviour
 	{
 		player.GetComponent<PlayerLook>().SetActive(state);
 		player.GetComponent<PlayerMovement>().SetActive(state);
+	}
+
+	public static bool IsInMainScene()
+	{
+		return SceneManager.GetActiveScene().buildIndex == 0;
 	}
 	#endregion
 

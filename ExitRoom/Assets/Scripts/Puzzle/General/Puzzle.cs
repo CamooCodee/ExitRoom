@@ -16,6 +16,8 @@ public class Puzzle : MonoBehaviour
 	#region UniqueFunctions
 	public void Activate(bool state)
 	{
+		if (!state) DisablePuzzle();
+
 		isActive = state;
 	}
 

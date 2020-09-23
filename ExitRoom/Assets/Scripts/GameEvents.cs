@@ -8,6 +8,7 @@ public class GameEvents : MonoBehaviour
 
 	#region Variables
 	public PlayerEvents Player { get; private set; }
+	public PlayerVision playerVision;
 	#endregion
 
 	#region UnityFunctions
@@ -26,6 +27,13 @@ public class GameEvents : MonoBehaviour
 		}
 	}
 
+	private void Update()
+	{
+		if (Input.GetKeyDown(KeyCode.E))
+		{
+			Player.PlayerInteractionEvent();
+		}
+	}
 	#endregion
 
 	#region UniqueFunctions
@@ -71,7 +79,12 @@ public class PlayerEvents : GameEventProperty
 {
 	public event Action OnPlayerVisionEnter;
 	public event Action OnPlayerVisionExit;
+	public event Action OnInteractionAttempt;
 
+	public void PlayerInteractionEvent()
+	{
+		OnInteractionAttempt?.Invoke();
+	}
 	public void PlayerVisionEnter(bool exitFirst = true)
 	{
 		if (exitFirst) PlayerVisionExit();

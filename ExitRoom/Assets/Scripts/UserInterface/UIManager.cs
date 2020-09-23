@@ -1,13 +1,18 @@
 ﻿using System.Reflection;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 using TMPro;
+using System;
 
 public class UIManager : MonoBehaviour
 {
 	public static UIManager current;
 
 	#region Variables
+	[SerializeField]public bool openedUIOverlay;
+
 	public GameObject canvas;
 	public List<UIBase> uiManager = new List<UIBase>();
 
@@ -17,6 +22,11 @@ public class UIManager : MonoBehaviour
 	#endregion
 	#region VisionUI
 	public Component ui_VisionInfo;
+	#endregion
+	#region TreasurePin
+	public Component ui_PinInputMain;
+	public TMP_InputField ui_PinInput;
+	public Button ui_TryPinButton;
 	#endregion
 
 	public Component ui_Crosshair;
@@ -37,12 +47,25 @@ public class UIManager : MonoBehaviour
 			current = this;
 		}
 		InitializeUIObjects();
-		AddManager(new BookUI(current, ui_Book, ui_BookHintText));
-		AddManager(new VisionUI(current, ui_VisionInfo));
+		if (!BookUI.isSceneRestricted || GameManager.IsInMainScene()) AddManager(new BookUI(current, ui_Book, ui_BookHintText));
+		if (!VisionUI.isSceneRestricted || GameManager.IsInMainScene()) AddManager(new VisionUI(current, ui_VisionInfo));
+		if(!TreasurePinUI.isSceneRestricted || GameManager.IsInMainScene()) AddManager(new TreasurePinUI(current, ui_PinInputMain, ui_PinInput, ui_TryPinButton));
 	}
 
 	private void Update()
 	{
+		if (Input.GetKeyDown(KeyCode.F5))
+		{
+			if (canvas.activeSelf)
+			{
+				DisableAll();
+			}
+			else
+			{
+				EnableAll();
+			}
+		}
+
 		foreach (UIBase manager in uiManager)
 		{
 			manager.InputThread();
@@ -95,11 +118,36 @@ public class UIManager : MonoBehaviour
 
 		foreach (Component obj in uiObjects)
 		{
-			if (obj != apartFrom && !obj.IsIndirectChildOf(apartFrom.transform) && !obj.transform.CompareTag("ActivationLock"))
+			if (obj != apartFrom && !obj.IsIndirectChildOf(apartFrom.transform) && !obj.transform.CompareTag("ActivationLock")
+				&& !obj.CompareTag("UIOverlay"))
 			{
 				obj.gameObject.SetActive(true);
 			}
 		}
+	}
+
+	public void CallFunctionOnAllManagers(string functionName, object[] parameters)
+	{
+		foreach (UIBase manager in uiManager)
+		{
+			MethodInfo method = manager.GetType().GetMethod(functionName);
+			if(method != null)
+			{
+				method.Invoke(manager, parameters);
+			}
+		}
+	}
+	public T GetManager<T>()
+	{
+		foreach (UIBase manager in uiManager)
+		{
+			if(manager.GetType() == typeof(T))
+			{
+				return (T)(object)manager;
+			}
+		}
+
+		return (T)(object)null;
 	}
 
 	public void HandleMajorUiRedraw()
@@ -122,6 +170,7 @@ public class UIManager : MonoBehaviour
 	#endregion
 }
 
+//TODO Warn if UiBase child doesnt have a static isSceneResticted field
 public class UIBase
 {
 	public readonly UIManager Manager;
@@ -143,6 +192,7 @@ public class UIBase
 #region UIClasses
 public class BookUI : UIBase
 {
+	public static bool isSceneRestricted = false;
 	bool bookActiveState = false;
 	readonly GameObject book;
 	readonly TextMeshProUGUI bookText;
@@ -173,7 +223,7 @@ public class BookUI : UIBase
 
 	void ToggleBook()
 	{
-		if (LeanTween.isTweening(book)) return;
+		if (LeanTween.isTweening(book) || (!book.activeSelf && Manager.openedUIOverlay)) return;
 
 		bookActiveState = !book.activeSelf;
 		book.SetActiveWithAnimation(!book.activeSelf);
@@ -183,9 +233,11 @@ public class BookUI : UIBase
 		if (bookActiveState)
 		{
 			Manager.DisableAll(book.transform);
+			Manager.openedUIOverlay = true;
 		}
 		else
 		{
+			Manager.openedUIOverlay = false;
 			Manager.EnableAll(book.transform);
 			Manager.HandleMajorUiRedraw();
 		}
@@ -193,12 +245,13 @@ public class BookUI : UIBase
 	void UpdateBookHint(Puzzle currentPuzzle)
 	{
 		if (currentPuzzle.puzzleData == null) return;
-
+		
 		bookText.text = currentPuzzle.puzzleData.bookHint;
 	}
 }
 public class VisionUI : UIBase
 {
+	public static bool isSceneRestricted = false;
 	readonly GameObject visionInfo;
 
 	public VisionUI(UIManager manager, Component visionPopUp) : base(manager)
@@ -227,6 +280,86 @@ public class VisionUI : UIBase
 	void DeactivatePopUp()
 	{
 		visionInfo.SetActive(false);
+	}
+}
+public class TreasurePinUI : UIBase
+{
+	public static bool isSceneRestricted = true;
+	readonly GameObject pinObject;
+	readonly TMP_InputField pinInput;
+	readonly Button tryPinButton;
+	public event Action<string> onPinEnter;
+
+	public TreasurePinUI(UIManager manager, Component pinInputParent, TMP_InputField pinDisp, Button tryButton) : base(manager)
+	{
+		pinObject = pinInputParent.gameObject;
+		pinInput = pinDisp;
+		tryPinButton = tryButton;
+		InitializeButton();
+
+		pinInput.onSubmit.AddListener(TryPin);
+		pinInput.onSubmit.AddListener(ClearPin);
+		pinInput.onSelect.AddListener(ClearPin);
+	}
+
+	#region UIBaseFuncs
+	public override void InputThread()
+	{
+		
+	}
+	public override void UpdateThread()
+	{
+		if(pinInput.isFocused && pinInput.characterLimit == pinInput.text.Length)
+		{
+			pinInput.OnDeselect(new BaseEventData(EventSystem.current));
+		}
+	}
+	#endregion
+	public void ClearPin(string input)
+	{
+		pinInput.text = "";
+	}
+
+	void InitializeButton()
+	{
+		tryPinButton.onClick.AddListener(TryPin);
+	}
+
+	public void TogglePinInput()
+	{
+		if (!pinObject.activeSelf && Manager.openedUIOverlay) return;
+
+		pinObject.SetActive(!pinObject.activeSelf);
+
+		GameManager.current.ActivatePlayerControlls(!pinObject.activeSelf);
+		GameManager.SetCursorLockState(!pinObject.activeSelf);
+
+		if (pinObject.activeSelf)
+		{
+			Manager.openedUIOverlay = true;
+			Manager.DisableAll(pinObject.transform);
+		}
+		else
+		{
+			Manager.openedUIOverlay = false;
+			Manager.EnableAll(pinObject.transform);
+			Manager.HandleMajorUiRedraw();
+		}
+	}
+
+	public void TryPin(string typedPin)
+	{
+		string pin = typedPin;
+
+		onPinEnter?.Invoke(pin);
+		TogglePinInput();
+	}
+	public void TryPin()
+	{
+		string pin = pinInput.text;
+
+		onPinEnter?.Invoke(pin);
+		TogglePinInput();
 	}
 }
 #endregion

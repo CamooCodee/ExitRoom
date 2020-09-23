@@ -6,6 +6,7 @@ using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
 //Behaviour is on the bush
+[RequireComponent(typeof(Interactable))]
 public class EnterBushPuzzle : Puzzle
 {
 	#region Variables
@@ -36,11 +37,7 @@ public class EnterBushPuzzle : Puzzle
 	private void Start()
 	{
 		postPro.profile.TryGet(out colorAdjustment);
-		if(isActive)GetComponent<Interactable>().onInteract += StartAnimate;
-		else
-		{
-			DisablePuzzle();
-		}
+		GetComponent<Interactable>().onInteract += StartAnimate;
 	}
 
 	private void Update()
@@ -54,7 +51,7 @@ public class EnterBushPuzzle : Puzzle
 	#region UniqueFunctions
 	public void StartAnimate()
 	{
-		if (isAnimating) return;
+		if (isAnimating || !isActive) return;
 
 		UIManager.current.DisableAll();
 
@@ -127,9 +124,9 @@ public class EnterBushPuzzle : Puzzle
 	}
 	protected override void DisablePuzzle()
 	{
-		Destroy(GetComponent<Interactable>());
 		gameObject.layer = 0;
 		Destroy(this);
+		Destroy(GetComponent<Interactable>());
 	}
 	#endregion
 

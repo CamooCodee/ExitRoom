@@ -14,6 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   loadNewSceneOnComplete: 1
   sceneIndex: 1
-  bookHint: Here will be a hint!
+  bookHint: What about a bush?
   hint1: 
   hint2: 
