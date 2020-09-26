@@ -26,8 +26,8 @@ public class GameManager : MonoBehaviour
 
 	private void Start()
 	{
-		SetCursorLockState(false);
-		ActivatePlayerControlls(false);
+		//SetCursorLockState(false);
+		//ActivatePlayerControlls(false);
 	}
 	#endregion
 
@@ -55,6 +55,11 @@ public class GameManager : MonoBehaviour
 	public static bool IsInMainScene()
 	{
 		return SceneManager.GetActiveScene().buildIndex == 0;
+	}
+
+	public static T GetPlayerComponent<T>()
+	{
+		return current.player.GetComponent<T>();
 	}
 	#endregion
 

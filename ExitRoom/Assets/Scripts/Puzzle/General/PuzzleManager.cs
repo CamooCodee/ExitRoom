@@ -52,6 +52,7 @@ public class PuzzleManager : MonoBehaviour
 		if (currentPuzzle == puzzles.Count)
 		{
 			Debug.Log("Played Through");
+			OnNewPuzzle(puzzles[currentPuzzle - 1]);
 			return;
 		}
 

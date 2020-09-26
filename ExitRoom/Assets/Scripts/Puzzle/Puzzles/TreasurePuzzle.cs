@@ -6,7 +6,7 @@ using UnityEngine;
 public class TreasurePuzzle : Puzzle
 {
 	#region solutionPin
-	const string CORRECT_PIN = "1264";
+	const string CORRECT_PIN = "1103";
 	#endregion
 
 	#region Variables
@@ -24,7 +24,11 @@ public class TreasurePuzzle : Puzzle
 	#region UniqueFunctions
 	void TogglePinOverlay()
 	{
-		if (!isActive) return;
+		if (!isActive)
+		{
+			UIManager.current.GetManager<PlayerWarningsUI>().ThrowInactivePuzzleWarning();
+			return;
+		}
 		UIManager.current.GetManager<TreasurePinUI>().TogglePinInput();
 	}
 

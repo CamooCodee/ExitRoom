@@ -32,12 +32,15 @@ public class SceneDataStore : MonoBehaviour
 	#region UniqueFunctions
 	public void AddData(SceneData data, string key)
 	{
+		int i = 0;
 		foreach (string k in keys.Keys)
 		{
 			if(k == key)
 			{
-				throw new System.Exception($"Trying to add already existing key: '{key}'!");
+				this.data[i] = data;
+				return;
 			}
+			i++;
 		}
 
 		keys.Add(key, this.data.Count);

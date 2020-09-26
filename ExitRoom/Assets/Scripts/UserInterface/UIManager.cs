@@ -5,6 +5,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using TMPro;
 using System;
+using System.Collections;
 
 public class UIManager : MonoBehaviour
 {
@@ -13,6 +14,8 @@ public class UIManager : MonoBehaviour
 	#region Variables
 	[SerializeField]public bool openedUIOverlay;
 
+	public string TextPopUpAnim_PopUpStateName;
+	[Space(18f)]
 	public GameObject canvas;
 	public List<UIBase> uiManager = new List<UIBase>();
 
@@ -20,14 +23,25 @@ public class UIManager : MonoBehaviour
 	public Component ui_Book;
 	public TextMeshProUGUI ui_BookHintText;
 	#endregion
+	[Space(10f)]
 	#region VisionUI
 	public Component ui_VisionInfo;
 	#endregion
+	[Space(10f)]
 	#region TreasurePin
 	public Component ui_PinInputMain;
 	public TMP_InputField ui_PinInput;
 	public Button ui_TryPinButton;
 	#endregion
+	[Space(10f)]
+	#region PlayerWarning
+	public TextMeshProUGUI ui_InactiveTaskDisplay;
+	#endregion
+	#region PlayerInformation
+	public TextMeshProUGUI ui_KeyDisplay;
+	public Component ui_FinalOverlay;
+	#endregion
+	[Space(10f)]
 
 	public Component ui_Crosshair;
 
@@ -47,9 +61,7 @@ public class UIManager : MonoBehaviour
 			current = this;
 		}
 		InitializeUIObjects();
-		if (!BookUI.isSceneRestricted || GameManager.IsInMainScene()) AddManager(new BookUI(current, ui_Book, ui_BookHintText));
-		if (!VisionUI.isSceneRestricted || GameManager.IsInMainScene()) AddManager(new VisionUI(current, ui_VisionInfo));
-		if(!TreasurePinUI.isSceneRestricted || GameManager.IsInMainScene()) AddManager(new TreasurePinUI(current, ui_PinInputMain, ui_PinInput, ui_TryPinButton));
+		AddAllManagers();
 	}
 
 	private void Update()
@@ -90,6 +102,14 @@ public class UIManager : MonoBehaviour
 				uiObjects.Add(field.GetValue(this) as Component);
 			}
 		}
+	}
+	void AddAllManagers()
+	{
+		if (!BookUI.isSceneRestricted || GameManager.IsInMainScene()) AddManager(new BookUI(current, ui_Book, ui_BookHintText));
+		if (!VisionUI.isSceneRestricted || GameManager.IsInMainScene()) AddManager(new VisionUI(current, ui_VisionInfo));
+		if (!TreasurePinUI.isSceneRestricted || GameManager.IsInMainScene()) AddManager(new TreasurePinUI(current, ui_PinInputMain, ui_PinInput, ui_TryPinButton));
+		if (!PlayerWarningsUI.isSceneRestricted || GameManager.IsInMainScene()) AddManager(new PlayerWarningsUI(current, ui_InactiveTaskDisplay));
+		if (!PlayerInformationUI.isSceneRestricted || GameManager.IsInMainScene()) AddManager(new PlayerInformationUI(current, ui_KeyDisplay, ui_FinalOverlay));
 	}
 
 	public void DisableAll(Component apartFrom = null)
@@ -147,7 +167,7 @@ public class UIManager : MonoBehaviour
 			}
 		}
 
-		return (T)(object)null;
+		throw new Exception($"Couldn't find a Manager with the given Type: {typeof(T).Name}");
 	}
 
 	public void HandleMajorUiRedraw()
@@ -360,6 +380,59 @@ public class TreasurePinUI : UIBase
 
 		onPinEnter?.Invoke(pin);
 		TogglePinInput();
+	}
+}
+public class PlayerWarningsUI : UIBase
+{
+	public static bool isSceneRestricted = false;
+	public TextMeshProUGUI inactivePuzzleDisplay;
+
+	public PlayerWarningsUI(UIManager manager, TextMeshProUGUI inactivePuzzleDisp) : base(manager)
+	{
+		inactivePuzzleDisplay = inactivePuzzleDisp;
+	}
+
+	public void ThrowInactivePuzzleWarning()
+	{
+		Animator displayAnim = inactivePuzzleDisplay.GetComponent<Animator>();
+		if (displayAnim == null)
+		{
+			throw new Exception("The inactivePuzzleDisplay-UiObject is expected to have an Animator");
+		}
+
+		if (!displayAnim.GetCurrentAnimatorStateInfo(0).IsTag(Manager.TextPopUpAnim_PopUpStateName))
+		{
+			displayAnim.SetTrigger("Activate");
+		}
+	}
+}
+public class PlayerInformationUI : UIBase
+{
+	public static bool isSceneRestricted = true;
+	public TextMeshProUGUI keyDisplay;
+	public GameObject finalScreen;
+
+	public PlayerInformationUI(UIManager manager, TextMeshProUGUI keyDisp, Component finalOverlay) : base(manager)
+	{
+		keyDisplay = keyDisp;
+		GameManager.GetPlayerComponent<PlayerGameData>().onNewKey += UpdateKeyDisplay;
+		finalScreen = finalOverlay.gameObject;
+	}
+
+	void UpdateKeyDisplay(int keyAmoumnt)
+	{
+		keyDisplay.text = keyAmoumnt.ToString();
+
+		if (GameManager.GetPlayerComponent<PlayerGameData>().GetKeyAmount() >= 2) EnableFinalScreen();
+	}
+
+	void EnableFinalScreen()
+	{
+		finalScreen.SetActive(true);
+
+		Manager.DisableAll(finalScreen.transform);
+		Manager.openedUIOverlay = true;
+		Time.timeScale = 0f;
 	}
 }
 #endregion
