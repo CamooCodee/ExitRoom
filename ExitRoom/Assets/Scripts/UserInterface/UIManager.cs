@@ -384,7 +384,7 @@ public class TreasurePinUI : UIBase
 }
 public class PlayerWarningsUI : UIBase
 {
-	public static bool isSceneRestricted = false;
+	public static bool isSceneRestricted = true;
 	public TextMeshProUGUI inactivePuzzleDisplay;
 
 	public PlayerWarningsUI(UIManager manager, TextMeshProUGUI inactivePuzzleDisp) : base(manager)

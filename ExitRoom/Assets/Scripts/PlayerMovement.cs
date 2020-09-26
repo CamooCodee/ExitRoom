@@ -59,11 +59,11 @@ public class PlayerMovement : MonoBehaviour
 	{
 		if (Input.GetKeyDown(KeyCode.LeftShift))
 		{
-			speed *= 1.8f;
+			speed *= 1.5f;
 		}
 		else if (Input.GetKeyUp(KeyCode.LeftShift))
 		{
-			speed /= 1.8f;
+			speed /= 1.5f;
 		}
 	}
 

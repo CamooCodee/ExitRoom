@@ -18134,6 +18134,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1896786059663629636, guid: 9ed4563a13b39844e9153ab03731ecb7,
+        type: 3}
+      propertyPath: m_SkinWidth
+      value: 0.05
+      objectReference: {fileID: 0}
     - target: {fileID: 1896786059663629637, guid: 9ed4563a13b39844e9153ab03731ecb7,
         type: 3}
       propertyPath: gravity
@@ -18703,12 +18708,12 @@ PrefabInstance:
     - target: {fileID: 4780121337609736891, guid: 59c8399eea3811c4c9e90b63959985ad,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.72997
+      value: 1.63
       objectReference: {fileID: 0}
     - target: {fileID: 4780121337609736891, guid: 59c8399eea3811c4c9e90b63959985ad,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -5.7328115
+      value: -10.92
       objectReference: {fileID: 0}
     - target: {fileID: 4780121337609736891, guid: 59c8399eea3811c4c9e90b63959985ad,
         type: 3}

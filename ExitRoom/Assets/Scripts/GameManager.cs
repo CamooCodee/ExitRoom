@@ -29,6 +29,18 @@ public class GameManager : MonoBehaviour
 		//SetCursorLockState(false);
 		//ActivatePlayerControlls(false);
 	}
+
+	private void Update()
+	{
+		if(Cursor.lockState == CursorLockMode.Locked && Cursor.visible)
+		{
+			Cursor.visible = false;
+		}
+		else if(!Cursor.visible && Cursor.lockState == CursorLockMode.None)
+		{
+			Cursor.visible = true;
+		}
+	}
 	#endregion
 
 	#region UniqueFunctions
@@ -39,10 +51,12 @@ public class GameManager : MonoBehaviour
 		if (!lockedState)
 		{
 			Cursor.lockState = CursorLockMode.None;
+			Cursor.visible = true;
 		}
 		else
 		{
 			Cursor.lockState = CursorLockMode.Locked;
+			Cursor.visible = false;
 		}
 	}
 
