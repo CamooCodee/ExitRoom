@@ -6,6 +6,7 @@ public class PlayerVision : MonoBehaviour
 {
 	#region Variables
 	public GameObject cam;
+	public GameObject camTarget;
 	public GameObject inVision;
 	GameObject previousVision;
 
@@ -56,7 +57,7 @@ public class PlayerVision : MonoBehaviour
 	}
 	public GameObject GetVisionObject()
 	{
-		if (Physics.Raycast(cam.transform.position, cam.transform.forward, out RaycastHit hit, visionRange, whatIsInteractable))
+		if (Physics.Raycast(camTarget.transform.position, cam.transform.forward, out RaycastHit hit, visionRange, whatIsInteractable))
 		{
 			return hit.collider.gameObject;
 		}

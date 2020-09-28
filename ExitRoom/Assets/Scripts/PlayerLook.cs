@@ -10,6 +10,7 @@ public class PlayerLook : MonoBehaviour
 	public Transform orientation;
 	[Header("Settings: ")]
 	public float sensitivity = 20f;
+	public float rotationSmoothSpeed = 10f;
 	#endregion
 
 	#region Private Variables
@@ -37,23 +38,22 @@ public class PlayerLook : MonoBehaviour
 
 	void MouseInput()
 	{
-		mouseX = Input.GetAxis("Mouse X") * sensitivity * Time.deltaTime;
-		mouseY = Input.GetAxis("Mouse Y") * sensitivity * Time.deltaTime;
+		mouseX = Input.GetAxis("Mouse X") * sensitivity;
+		mouseY = Input.GetAxis("Mouse Y") * sensitivity;
 	}
 
 	void Look()
 	{
-		
-		//Find current look rotation
-		yRotation += mouseX;
+		yRotation += mouseX * sensitivity;
+		xRotation += mouseY * sensitivity;
 
-		//Rotate, and also make sure we dont over- or under-rotate.
-		xRotation -= mouseY;
 		xRotation = Mathf.Clamp(xRotation, -90f, 90f);
 
-		//Perform the rotations
-		cam.transform.localEulerAngles = new Vector2(xRotation, 0f);
-		orientation.transform.localEulerAngles = new Vector2(0f, yRotation);
+		Quaternion camTargetRotation = Quaternion.Euler(-xRotation, cam.eulerAngles.y, cam.eulerAngles.z);
+		Quaternion orientationTargetRotation = Quaternion.Euler(0, yRotation, 0);
+
+		orientation.rotation = Quaternion.Lerp(orientation.rotation, orientationTargetRotation, Time.deltaTime * rotationSmoothSpeed);
+		cam.rotation = Quaternion.Lerp(cam.rotation, camTargetRotation, Time.deltaTime * rotationSmoothSpeed);
 	}
 
 	public void SetActive(bool state)

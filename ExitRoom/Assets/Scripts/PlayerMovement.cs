@@ -5,28 +5,61 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour
 {
 	#region Variables
-	public CharacterController controller;
+	public Rigidbody rb;
 	public Transform orientation;
-	public Transform groundCheck;
 
 	[Space(20f)]
 
-	public float speed = 12f;
-	public float jumpHeight = 4f;
-	public float gravity = -9.81f;
+	public float walkSpeed = 12f;
+	public float runSpeed = 12f;
+	[Space(5f)]
+	[Range(0f, 1f)]
+	public float landingSpeedPercantage;
+	public float onLandingSpeedIncrease;
+	[Range(0f, 10f)]
+	public float effectByLandingVelocityMultipl;
+	public bool effectByLandingVelocity;
+	[Space(5f)]
+	public float jumpForce = 30f;
 	[Space(8f)]
 	public float groundCheckRadius = .4f;
 	public LayerMask whatIsGround;
 
-	Vector3 velocity;
+	Vector3 deltaPosition;
+	bool pressedJump;
+	float speed;
+	float extraLandingMultipl = 1f;
 	bool canMove = true;
 	bool isGrounded = false;
 	#endregion
 
 	#region UnityFunctions
+	private void Start()
+	{
+		speed = walkSpeed;
+	}
+
+	private void FixedUpdate()
+	{
+		if (!canMove) return;
+		Move();
+		Jump();
+	}
 	private void Update()
 	{
-		Move();
+		if(extraLandingMultipl < 1f)
+		{
+			extraLandingMultipl += Time.deltaTime * onLandingSpeedIncrease;
+		}
+		else if (extraLandingMultipl > 1f)
+		{
+			extraLandingMultipl = Mathf.Clamp01(extraLandingMultipl);
+		}
+
+		if (!canMove) return;
+		HandleGround();
+		Sprint();
+		JumpInput();
 	}
 	#endregion
 
@@ -42,54 +75,58 @@ public class PlayerMovement : MonoBehaviour
 
 	private void Move()
 	{
-		Sprint();
+		Vector2 input = GetInput();
 
-		Vector2 input = Vector2.zero;
+		deltaPosition = ((orientation.forward * input.y) + (orientation.right * input.x)) * extraLandingMultipl * Time.fixedDeltaTime * speed;
 
-		if (canMove) input = GetInput();
-
-		Vector3 move = orientation.right * input.x + orientation.forward * input.y;
-
-		controller.Move(move * speed * Time.deltaTime);
-
-		CheckGround();
-		HandleVertical(CheckGround());
+		rb.MovePosition(rb.position + deltaPosition);
 	}
+
 	void Sprint()
 	{
 		if (Input.GetKeyDown(KeyCode.LeftShift))
 		{
-			speed *= 1.5f;
+			speed = runSpeed;
 		}
 		else if (Input.GetKeyUp(KeyCode.LeftShift))
 		{
-			speed /= 1.5f;
+			speed = walkSpeed;
 		}
 	}
 
+	void JumpInput()
+	{
+		if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+		{
+			pressedJump = true;
+		}
+	}
 	void Jump()
 	{
-		if (Input.GetButtonDown("Jump") && isGrounded)
+		if (pressedJump)
 		{
-			velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+			rb.velocity += Vector3.up * jumpForce;
+			pressedJump = false;
 		}
 	}
-	void HandleVertical(bool isOnGround)
+
+	void HandleGround()
 	{
-		if (isOnGround && velocity.y < 0f)
+		bool _isGrounded = Physics.Raycast(transform.position, Vector3.down, groundCheckRadius, whatIsGround);
+
+		if (_isGrounded && !isGrounded)
 		{
-			velocity.y = -5.5f;
+			extraLandingMultipl = landingSpeedPercantage;
+
+			if (effectByLandingVelocity)
+			{
+				extraLandingMultipl *= (1 / Mathf.Abs(rb.velocity.y)) * effectByLandingVelocityMultipl;
+			}
+
+			extraLandingMultipl = Mathf.Clamp01(extraLandingMultipl);
 		}
 
-		Jump();
-
-		velocity.y += gravity * Time.deltaTime;
-		controller.Move(velocity * Time.deltaTime);
-	}
-	bool CheckGround()
-	{
-		isGrounded = Physics.CheckSphere(groundCheck.position, groundCheckRadius, whatIsGround);
-		return isGrounded;
+		isGrounded = _isGrounded;
 	}
 
 	public void SetActive(bool state)

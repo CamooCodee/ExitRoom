@@ -12,9 +12,11 @@ public class UIManager : MonoBehaviour
 	public static UIManager current;
 
 	#region Variables
-	[SerializeField]public bool openedUIOverlay;
+	[HideInInspector]public GameObject openedUIOverlay = null;
+	[HideInInspector]public bool closeUIOverlay;
 
 	public string TextPopUpAnim_PopUpStateName;
+	public KeyCode[] closeUIOverlayKeys;
 	[Space(18f)]
 	public GameObject canvas;
 	public List<UIBase> uiManager = new List<UIBase>();
@@ -75,6 +77,19 @@ public class UIManager : MonoBehaviour
 			else
 			{
 				EnableAll();
+			}
+		}
+
+		foreach (KeyCode key in closeUIOverlayKeys)
+		{
+		    if(Input.GetKeyDown(key))
+			{
+				closeUIOverlay = true;
+				break;
+			}
+			else
+			{
+				closeUIOverlay = false;
 			}
 		}
 
@@ -230,6 +245,11 @@ public class BookUI : UIBase
 	#region UIBaseFuncs
 	public override void InputThread()
 	{
+		if(Manager.closeUIOverlay && Manager.openedUIOverlay == book)
+		{
+			ToggleBook();
+			return;
+		}
 		if (Input.GetKeyDown(KeyCode.Tab))
 		{
 			ToggleBook();
@@ -243,7 +263,7 @@ public class BookUI : UIBase
 
 	void ToggleBook()
 	{
-		if (LeanTween.isTweening(book) || (!book.activeSelf && Manager.openedUIOverlay)) return;
+		if (LeanTween.isTweening(book) || (Manager.openedUIOverlay != book && Manager.openedUIOverlay != null)) return;
 
 		bookActiveState = !book.activeSelf;
 		book.SetActiveWithAnimation(!book.activeSelf);
@@ -253,15 +273,16 @@ public class BookUI : UIBase
 		if (bookActiveState)
 		{
 			Manager.DisableAll(book.transform);
-			Manager.openedUIOverlay = true;
+			Manager.openedUIOverlay = book;
 		}
 		else
 		{
-			Manager.openedUIOverlay = false;
+			Manager.openedUIOverlay = null;
 			Manager.EnableAll(book.transform);
 			Manager.HandleMajorUiRedraw();
 		}
 	}
+
 	void UpdateBookHint(Puzzle currentPuzzle)
 	{
 		if (currentPuzzle.puzzleData == null) return;
@@ -333,6 +354,10 @@ public class TreasurePinUI : UIBase
 		{
 			pinInput.OnDeselect(new BaseEventData(EventSystem.current));
 		}
+		if(Manager.closeUIOverlay && Manager.openedUIOverlay == pinObject)
+		{
+			TogglePinInput();
+		}
 	}
 	#endregion
 	public void ClearPin(string input)
@@ -347,7 +372,7 @@ public class TreasurePinUI : UIBase
 
 	public void TogglePinInput()
 	{
-		if (!pinObject.activeSelf && Manager.openedUIOverlay) return;
+		if (Manager.openedUIOverlay != pinObject && Manager.openedUIOverlay != null) return;
 
 		pinObject.SetActive(!pinObject.activeSelf);
 
@@ -356,12 +381,12 @@ public class TreasurePinUI : UIBase
 
 		if (pinObject.activeSelf)
 		{
-			Manager.openedUIOverlay = true;
+			Manager.openedUIOverlay = pinObject;
 			Manager.DisableAll(pinObject.transform);
 		}
 		else
 		{
-			Manager.openedUIOverlay = false;
+			Manager.openedUIOverlay = null;
 			Manager.EnableAll(pinObject.transform);
 			Manager.HandleMajorUiRedraw();
 		}
@@ -431,7 +456,7 @@ public class PlayerInformationUI : UIBase
 		finalScreen.SetActive(true);
 
 		Manager.DisableAll(finalScreen.transform);
-		Manager.openedUIOverlay = true;
+		Manager.openedUIOverlay = finalScreen;
 		Time.timeScale = 0f;
 	}
 }

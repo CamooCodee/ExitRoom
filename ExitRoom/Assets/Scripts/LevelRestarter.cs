@@ -5,7 +5,7 @@ using UnityEngine;
 public class LevelRestarter : MonoBehaviour
 {
 	#region Variables
-	public CharacterController player;
+	public GameObject player;
 	Vector3 startPos;
 	#endregion
 
@@ -32,9 +32,7 @@ public class LevelRestarter : MonoBehaviour
 	#region UniqueFunctions
 	void Restart()
 	{
-		player.enabled = false;
 		player.transform.position = startPos;
-		player.enabled = true;
 	}
 	#endregion
 

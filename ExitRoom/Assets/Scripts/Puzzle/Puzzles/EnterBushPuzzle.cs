@@ -58,9 +58,6 @@ public class EnterBushPuzzle : Puzzle
 		player.GetComponent<PlayerMovement>().SetActive(false);
 		player.GetComponent<PlayerLook>().SetActive(false);
 
-		cam.transform.localEulerAngles = new Vector3(cam.transform.localEulerAngles.x, orientation.transform.localEulerAngles.y, 0f);
-		orientation.transform.localEulerAngles = Vector3.zero;
-
 		camStartPos = cam.transform.position;
 		camStartRot = cam.transform.localEulerAngles;
 		isAnimating = true;
