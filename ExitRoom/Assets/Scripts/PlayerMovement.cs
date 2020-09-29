@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
+//TIME BTW JUMPS
 public class PlayerMovement : MonoBehaviour
 {
 	#region Variables
 	public Rigidbody rb;
 	public Transform orientation;
+	public Animator camAnim;
 
 	[Space(20f)]
 
@@ -21,22 +24,31 @@ public class PlayerMovement : MonoBehaviour
 	public bool effectByLandingVelocity;
 	[Space(5f)]
 	public float jumpForce = 30f;
+	public float jumpThresholdTime;
+	float jumpThresholdStartTime;
 	[Space(8f)]
 	public float groundCheckRadius = .4f;
 	public LayerMask whatIsGround;
 
 	Vector3 deltaPosition;
 	bool pressedJump;
+	bool isJumping;
+	float lastLandingVelocity = 0f;
 	float speed;
 	float extraLandingMultipl = 1f;
 	bool canMove = true;
+	bool rayIsGrounded = false;
 	bool isGrounded = false;
+	GameObject standingOn = null;
+	bool canJump = false;
 	#endregion
 
 	#region UnityFunctions
 	private void Start()
 	{
 		speed = walkSpeed;
+		camAnim.SetFloat("WalkSpeed", .9f);
+		jumpThresholdStartTime = jumpThresholdTime;
 	}
 
 	private void FixedUpdate()
@@ -55,11 +67,36 @@ public class PlayerMovement : MonoBehaviour
 		{
 			extraLandingMultipl = Mathf.Clamp01(extraLandingMultipl);
 		}
-
 		if (!canMove) return;
 		HandleGround();
 		Sprint();
 		JumpInput();
+	}
+
+	private void OnCollisionEnter(Collision other)
+	{
+		if(other.gameObject == standingOn && isJumping)
+		{
+			isGrounded = true;
+
+			camAnim.SetTrigger("Landing");
+
+			extraLandingMultipl = landingSpeedPercantage;
+
+			if (effectByLandingVelocity)
+			{
+				extraLandingMultipl *= (1 / Mathf.Abs(lastLandingVelocity)) * effectByLandingVelocityMultipl;
+			}
+
+			extraLandingMultipl = Mathf.Clamp01(extraLandingMultipl);
+		}
+	}
+	private void OnCollisionExit(Collision other)
+	{
+		if (other.gameObject == standingOn)
+		{
+			isGrounded = false;
+		}
 	}
 	#endregion
 
@@ -77,6 +114,12 @@ public class PlayerMovement : MonoBehaviour
 	{
 		Vector2 input = GetInput();
 
+		bool isWalking = input != Vector2.zero;
+		if (camAnim.GetBool("IsWalking") != isWalking)
+		{
+			camAnim.SetBool("IsWalking", isWalking);
+		}
+
 		deltaPosition = ((orientation.forward * input.y) + (orientation.right * input.x)) * extraLandingMultipl * Time.fixedDeltaTime * speed;
 
 		rb.MovePosition(rb.position + deltaPosition);
@@ -84,27 +127,31 @@ public class PlayerMovement : MonoBehaviour
 
 	void Sprint()
 	{
-		if (Input.GetKeyDown(KeyCode.LeftShift))
+		if (Input.GetKey(KeyCode.LeftShift) && rayIsGrounded)
 		{
+			camAnim.SetFloat("WalkSpeed", 1.3f);
 			speed = runSpeed;
 		}
-		else if (Input.GetKeyUp(KeyCode.LeftShift))
+		else if (rayIsGrounded)
 		{
+			camAnim.SetFloat("WalkSpeed", .9f);
 			speed = walkSpeed;
 		}
 	}
 
 	void JumpInput()
 	{
-		if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+		if (Input.GetKeyDown(KeyCode.Space) && canJump)
 		{
 			pressedJump = true;
+			isJumping = true;
 		}
 	}
 	void Jump()
 	{
 		if (pressedJump)
 		{
+			camAnim.SetTrigger("Jumping");
 			rb.velocity += Vector3.up * jumpForce;
 			pressedJump = false;
 		}
@@ -112,21 +159,32 @@ public class PlayerMovement : MonoBehaviour
 
 	void HandleGround()
 	{
-		bool _isGrounded = Physics.Raycast(transform.position, Vector3.down, groundCheckRadius, whatIsGround);
+		RaycastHit hit;
 
-		if (_isGrounded && !isGrounded)
+		bool _isGrounded = Physics.Raycast(transform.position, Vector3.down, out hit, groundCheckRadius, whatIsGround);
+
+		if (hit.collider != null) standingOn = hit.collider.gameObject;
+		else standingOn = null;
+
+		if(_isGrounded && rayIsGrounded)
 		{
-			extraLandingMultipl = landingSpeedPercantage;
-
-			if (effectByLandingVelocity)
-			{
-				extraLandingMultipl *= (1 / Mathf.Abs(rb.velocity.y)) * effectByLandingVelocityMultipl;
-			}
-
-			extraLandingMultipl = Mathf.Clamp01(extraLandingMultipl);
+			lastLandingVelocity = rb.velocity.y;
 		}
 
-		isGrounded = _isGrounded;
+		rayIsGrounded = _isGrounded;
+		HandleJumpThreshold();
+	}
+	void HandleJumpThreshold()
+	{
+		if (isGrounded && jumpThresholdTime <= 0f) isJumping = false;
+		if (isGrounded) jumpThresholdTime = jumpThresholdStartTime;
+
+		if(!rayIsGrounded && jumpThresholdTime >= 0f)
+		{
+			jumpThresholdTime -= Time.deltaTime;
+		}
+
+		canJump = !isJumping || rayIsGrounded;
 	}
 
 	public void SetActive(bool state)

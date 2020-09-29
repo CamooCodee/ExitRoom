@@ -97,12 +97,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rb: {fileID: 1492007132}
   orientation: {fileID: 1896786060503492174}
+  camAnim: {fileID: 0}
   walkSpeed: 8.4
   runSpeed: 11
-  landingSpeedPercantage: 0.72
-  onLandingSpeedIncrease: 1.2
+  landingSpeedPercantage: 0.6
+  onLandingSpeedIncrease: 2
+  effectByLandingVelocityMultipl: 6
   effectByLandingVelocity: 1
   jumpForce: 10
+  jumpThresholdTime: 0.2
   groundCheckRadius: 2.15
   whatIsGround:
     serializedVersion: 2
